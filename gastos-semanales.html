@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Gastos Semanales</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            font-size: 1em;
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro de Gastos</h1>
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" placeholder="Descripción del gasto">
+        
+        <label for="monto">Monto ($):</label>
+        <input type="number" id="monto" placeholder="Monto en dólares" min="0">
+        
+        <button onclick="agregarGasto()">Agregar Gasto</button>
+        <h2>Resumen Semanal</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Monto ($)</th>
+                </tr>
+            </thead>
+            <tbody id="listaGastos">
+                <!-- Aquí se mostrarán los gastos -->
+            </tbody>
+        </table>
+        
+        <p><strong>Total Semanal:</strong> $<span id="total">0</span></p>
+        
+        <button onclick="reiniciarSemana()">Reiniciar Semana</button>
+    </div>
+    
+    <script>
+        // Cargar los gastos desde el localStorage al cargar la página
+        document.addEventListener("DOMContentLoaded", () => {
+            mostrarGastos();
+        });
+
+        // Función para agregar un gasto
+        function agregarGasto() {
+            const descripcion = document.getElementById("descripcion").value;
+            const monto = parseFloat(document.getElementById("monto").value);
+            
+            if (descripcion && monto > 0) {
+                const nuevoGasto = { descripcion, monto };
+                let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+                gastos.push(nuevoGasto);
+                localStorage.setItem("gastos", JSON.stringify(gastos));
+                mostrarGastos();
+                document.getElementById("descripcion").value = "";
+                document.getElementById("monto").value = "";
+            } else {
+                alert("Por favor, ingresa una descripción y un monto válido.");
+            }
+        }
+
+        // Función para mostrar los gastos y calcular el total
+        function mostrarGastos() {
+            const listaGastos = document.getElementById("listaGastos");
+            const total = document.getElementById("total");
+            listaGastos.innerHTML = "";
+            let totalGastos = 0;
+
+            let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+            gastos.forEach(gasto => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `<td>${gasto.descripcion}</td><td>$${gasto.monto.toFixed(2)}</td>`;
+                listaGastos.appendChild(fila);
+                totalGastos += gasto.monto;
+            });
+
+            total.textContent = totalGastos.toFixed(2);
+        }
+
+        // Función para reiniciar la semana (borrar todos los gastos)
+        function reiniciarSemana() {
+            if (confirm("¿Estás seguro de que deseas reiniciar los gastos de la semana?")) {
+                localStorage.removeItem("gastos");
+                mostrarGastos();
+            }
+        }
+    </script>
+</body>
+</html>
